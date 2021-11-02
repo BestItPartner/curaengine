@@ -662,7 +662,8 @@ void FffPolygonGenerator::processPerimeterGaps(SliceDataStorage& storage)
                         // we print them as a perimeter gap
                         inner = inner.offset(-skin_line_width / 2).offset(skin_line_width / 2);
                     }
-                    inner = inner.unionPolygons(part.infill_area);
+                    inner.add(part.infill_area.offset(-infill_line_width / 2).offset(infill_line_width / 2));
+                    inner = inner.unionPolygons();
                     part.perimeter_gaps.add(outer.difference(inner));
 
                     if (filter_out_tiny_gaps) {

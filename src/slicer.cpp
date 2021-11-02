@@ -41,17 +41,41 @@ void SlicerLayer::makeBasicPolygonLoop(Polygons& open_polylines, const size_t st
     Polygon poly;
     poly.add(segments[start_segment_idx].start);
 
+    Point pre_pt;
     for (int segment_idx = start_segment_idx; segment_idx != -1; )
     {
         SlicerSegment& segment = segments[segment_idx];
-        poly.add(segment.end);
+        
         segment.addedToPolygon = true;
         segment_idx = getNextSegmentIdx(segment, start_segment_idx);
         if (segment_idx == static_cast<int>(start_segment_idx))
         { // polyon is closed
+            if(pre_pt != poly[poly.size() - 1]){
+                poly.add(pre_pt);
+            }
+            poly.add(segment.end);
             polygons.add(poly);
             return;
         }
+
+        if(poly.size() > 1){
+            Point pt1 = poly[poly.size() - 1];
+            Point pt2 = poly[poly.size() - 2];
+
+            Point pt = pre_pt - segment.end;
+            pt1 = pt2 - pre_pt;
+            if(abs(angle(pt) - angle(pt1)) > 10){
+                if(pre_pt != poly[poly.size() - 1]){
+                   poly.add(pre_pt);
+                }
+                poly.add(segment.end);
+            }
+                
+        }else{
+            poly.add(segment.end);
+        }
+
+        pre_pt = segment.end;
     }
     // polygon couldn't be closed
     open_polylines.add(poly);
